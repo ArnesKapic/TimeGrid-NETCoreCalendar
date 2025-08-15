@@ -1,0 +1,4 @@
+# Ignore minified JS/CSS and vendor libraries for language stats
+wwwroot/lib/* linguist-vendored
+*.min.js linguist-vendored
+*.min.css linguist-vendored
