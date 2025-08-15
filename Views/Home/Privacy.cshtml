@@ -1,0 +1,186 @@
+﻿@{
+    ViewData["Title"] = "Privacy Policy";
+    var lastUpdated = "August 2025";
+}
+
+<style>
+    /* Pretty <details> to resemble cards/accordion */
+    details.policy-item {
+        border: 1px solid #e5e7eb;
+        border-radius: 0.75rem;
+        background: #fff;
+    }
+
+        details.policy-item + details.policy-item {
+            margin-top: .75rem;
+        }
+
+        details.policy-item > summary {
+            list-style: none;
+            cursor: pointer;
+            padding: .9rem 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+        }
+
+            details.policy-item > summary::marker {
+                display: none;
+            }
+
+        details.policy-item[open] > summary {
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        details.policy-item .body {
+            padding: 1rem;
+        }
+
+    .container-narrow {
+        max-width: 900px;
+        margin: 1.5rem auto;
+    }
+</style>
+
+<section class="container-narrow">
+    <h1 class="display-6 mb-1">@ViewData["Title"]</h1>
+    <p class="text-muted">Last updated: @lastUpdated</p>
+
+    <!-- Contents -->
+    <div class="card mb-3">
+        <div class="card-body">
+            <strong>Contents</strong>
+            <ol class="m-0 ps-3">
+                <li><a href="#s1">Information we collect</a></li>
+                <li><a href="#s2">How we use information</a></li>
+                <li><a href="#s3">Sharing & third parties</a></li>
+                <li><a href="#s4">Cookies & analytics</a></li>
+                <li><a href="#s5">Data retention</a></li>
+                <li><a href="#s6">Security</a></li>
+                <li><a href="#s7">Your rights</a></li>
+                <li><a href="#s8">Children’s privacy</a></li>
+                <li><a href="#s9">Changes to this policy</a></li>
+                <li><a href="#s10">Contact us</a></li>
+            </ol>
+        </div>
+    </div>
+
+    <details id="s1" class="policy-item" open>
+        <summary>1) Information we collect</summary>
+        <div class="body">
+            <ul>
+                <li><strong>Account & identity.</strong> Name, email, and authentication data if you sign in.</li>
+                <li><strong>Calendar data.</strong> Event titles, descriptions, times, locations/resources, and metadata you add.</li>
+                <li><strong>Usage data.</strong> Pages visited, features used, timestamps.</li>
+                <li><strong>Device data.</strong> Browser/OS info for debugging.</li>
+                <li><strong>Cookies.</strong> To keep you signed in and remember preferences (see §4).</li>
+            </ul>
+        </div>
+    </details>
+
+    <details id="s2" class="policy-item">
+        <summary>2) How we use information</summary>
+        <div class="body">
+            <ul>
+                <li>Provide and maintain the calendar service and features (views, reminders, sharing).</li>
+                <li>Improve performance, reliability, and user experience.</li>
+                <li>Detect, prevent, and address errors, abuse, and security incidents.</li>
+                <li>Communicate important service updates.</li>
+                <li><em>(If applicable)</em> With consent, send tips/marketing—opt out anytime.</li>
+            </ul>
+        </div>
+    </details>
+
+    <details id="s3" class="policy-item">
+        <summary>3) Sharing & third parties</summary>
+        <div class="body">
+            <p>We don’t sell personal information. We may share with:</p>
+            <ul>
+                <li><strong>Service providers</strong> (hosting, error logging) under confidentiality/security agreements.</li>
+                <li><strong>Legal</strong> compliance or to protect rights/safety.</li>
+                <li><strong>Business transfers</strong> (merger/acquisition) with notice.</li>
+            </ul>
+        </div>
+    </details>
+
+    <details id="s4" class="policy-item">
+        <summary>4) Cookies & analytics</summary>
+        <div class="body">
+            <p>We use necessary cookies for sign-in and preferences. Optional cookies help us understand usage.</p>
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="cookies_analytics">
+                <label class="form-check-label" for="cookies_analytics">Allow analytics cookies</label>
+            </div>
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="cookies_marketing">
+                <label class="form-check-label" for="cookies_marketing">Allow marketing cookies</label>
+            </div>
+            <small class="text-muted d-block mt-2">Your choice is stored in your browser (local only).</small>
+        </div>
+    </details>
+
+    <details id="s5" class="policy-item">
+        <summary>5) Data retention</summary>
+        <div class="body">
+            <p>We retain personal data only as long as needed to provide the service and meet legal obligations. You may request deletion at any time.</p>
+        </div>
+    </details>
+
+    <details id="s6" class="policy-item">
+        <summary>6) Security</summary>
+        <div class="body">
+            <p>We use reasonable technical and organizational measures (TLS in transit, access controls, regular updates). No method is 100% secure.</p>
+        </div>
+    </details>
+
+    <details id="s7" class="policy-item">
+        <summary>7) Your rights</summary>
+        <div class="body">
+            <p>Depending on region: access, correction, deletion, restriction/objection, portability, and withdrawal of consent.</p>
+            <div class="d-flex flex-wrap gap-2 mt-2">
+                <a class="btn btn-primary" href="/Privacy/Request">Submit a privacy request</a>
+                <a class="btn btn-outline-danger" href="/Account/Delete">Delete account</a>
+                <button class="btn btn-outline-secondary" type="button" onclick="window.print()">Print this policy</button>
+            </div>
+        </div>
+    </details>
+
+    <details id="s8" class="policy-item">
+        <summary>8) Children’s privacy</summary>
+        <div class="body">
+            <p>Not directed to children under 13 (or local minimum age). If a child provided data, contact us to remove it.</p>
+        </div>
+    </details>
+
+    <details id="s9" class="policy-item">
+        <summary>9) Changes to this policy</summary>
+        <div class="body">
+            <p>We’ll update this page for changes and indicate the new date; material changes may include additional notice.</p>
+        </div>
+    </details>
+
+    <details id="s10" class="policy-item">
+        <summary>10) Contact us</summary>
+        <div class="body">
+            <p><strong>Company/Owner:</strong> Arnes Kapic</p>
+            <p><strong>Email:</strong> ArnesKapic@gmail.com</p>
+            <p><strong>Address:</strong> 123 Example St, Brooklyn, IA, 50000, United States</p>
+        </div>
+    </details>
+</section>
+
+@section Scripts {
+    <script>
+        // Save simple cookie preferences locally
+        (function () {
+            ['cookies_analytics', 'cookies_marketing'].forEach(function (k) {
+                var el = document.getElementById(k);
+                if (!el) return;
+                var saved = localStorage.getItem(k);
+                if (saved !== null) el.checked = saved === 'true';
+                el.addEventListener('change', function () { localStorage.setItem(k, el.checked); });
+            });
+        })();
+    </script>
+}

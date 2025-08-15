@@ -1,0 +1,29 @@
+﻿@model DotNetCoreCalendar.Models.Location
+@{
+    ViewData["Title"] = "Delete Location";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container my-4">
+    <div class="card border-danger shadow-sm">
+        <div class="card-header d-flex justify-content-between">
+            <h1 class="h5 mb-0">Delete Location</h1>
+            <a class="btn-close" asp-controller="Location" asp-action="Index"></a>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-warning">This action cannot be undone.</div>
+            <dl class="row">
+                <dt class="col-sm-3">Name</dt>
+                <dd class="col-sm-9">@Model.Name</dd>
+            </dl>
+            <form asp-controller="Location" asp-action="Delete" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="Id" />
+                <button class="btn btn-danger" type="submit">
+                    <i class="fa fa-trash me-1"></i> Delete
+                </button>
+                <a class="btn btn-outline-secondary" asp-controller="Location" asp-action="Index">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>

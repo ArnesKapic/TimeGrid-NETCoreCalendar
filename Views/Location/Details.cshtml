@@ -1,0 +1,96 @@
+﻿@model DotNetCoreCalendar.Models.Location
+@{
+    ViewData["Title"] = "Location Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var returnUrl = Context.Request.Query["returnUrl"].ToString();
+}
+
+<div class="container my-4">
+    <div class="card shadow-sm">
+        <div class="card-header d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-primary">Location</span>
+                <h1 class="h4 mb-0">Details</h1>
+            </div>
+            <!-- Close: closes modal if present; else navigate back -->
+            <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal" id="pageCloseBtn"></button>
+        </div>
+
+        <div class="card-body">
+            <dl class="row mb-0">
+                <dt class="col-sm-3">Name</dt>
+                <dd class="col-sm-9">@Model.Name</dd>
+
+                <dt class="col-sm-3">ID</dt>
+                <dd class="col-sm-9">
+                    <code id="locId">@Model.Id</code>
+                    <button type="button" class="btn btn-sm btn-outline-secondary ms-2" id="copyIdBtn" title="Copy ID">
+                        <i class="fa fa-clipboard"></i>
+                    </button>
+                </dd>
+            </dl>
+        </div>
+
+        <div class="card-footer d-flex flex-wrap gap-2">
+            <a class="btn btn-primary" asp-action="Edit" asp-route-id="@Model.Id">
+                <i class="fa fa-edit me-1"></i> Edit
+            </a>
+            <a class="btn btn-outline-danger" asp-action="Delete" asp-route-id="@Model.Id">
+                <i class="fa fa-trash me-1"></i> Delete
+            </a>
+            <a class="btn btn-outline-secondary" asp-action="Index">
+                <i class="fa fa-arrow-left me-1"></i> Back to List
+            </a>
+            <a class="btn btn-outline-secondary" href="/MyCalendar">
+                <i class="fa fa-calendar me-1"></i> Back to Calendar
+            </a>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            // Close button: if not in a modal, go back gracefully
+            var closeBtn = document.getElementById('pageCloseBtn');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', function (e) {
+                    var inModal = document.querySelector('.modal.show');
+                    if (!inModal) {
+                        e.preventDefault();
+                        var back = new URLSearchParams(window.location.search).get('returnUrl');
+                        window.location.href = back || '@Url.Action("Index","Location")';
+                    }
+                });
+            }
+
+            // Copy ID to clipboard
+            var copyBtn = document.getElementById('copyIdBtn');
+            if (copyBtn) {
+                copyBtn.addEventListener('click', function () {
+                    var text = document.getElementById('locId')?.textContent || '';
+                    if (!text) return;
+                    if (navigator.clipboard && window.isSecureContext) {
+                        navigator.clipboard.writeText(text).then(showCopied, showCopied);
+                    } else {
+                        // Fallback
+                        var ta = document.createElement('textarea');
+                        ta.value = text; document.body.appendChild(ta);
+                        ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+                        showCopied();
+                    }
+                });
+            }
+            function showCopied() {
+                copyBtn.classList.remove('btn-outline-secondary');
+                copyBtn.classList.add('btn-success');
+                copyBtn.innerHTML = '<i class="fa fa-check"></i>';
+                setTimeout(function () {
+                    copyBtn.classList.remove('btn-success');
+                    copyBtn.classList.add('btn-outline-secondary');
+                    copyBtn.innerHTML = '<i class="fa fa-clipboard"></i>';
+                }, 1500);
+            }
+        })();
+    </script>
+}

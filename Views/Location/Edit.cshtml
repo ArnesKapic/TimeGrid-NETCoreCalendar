@@ -1,0 +1,82 @@
+﻿@model DotNetCoreCalendar.Models.Location
+
+@{
+    ViewData["Title"] = "Edit Location";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var returnUrl = Context.Request.Query["returnUrl"].ToString();
+}
+
+<div class="container my-4">
+    <div class="card shadow-sm">
+        <div class="card-header d-flex align-items-center justify-content-between">
+            <div>
+                <h1 class="h4 mb-0">Edit Location</h1>
+                <small class="text-muted">Update the location name</small>
+            </div>
+            <!-- Close: closes modal if present; else navigate back -->
+            <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal" id="pageCloseBtn"></button>
+        </div>
+
+        <div class="card-body">
+            <form asp-action="Edit" method="post" id="edit-location" class="needs-validation" novalidate
+                  asp-route-returnUrl="@returnUrl">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="Id" />
+
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
+
+                <div class="mb-3">
+                    <label asp-for="Name" class="form-label">Name</label>
+                    <input asp-for="Name" class="form-control" placeholder="Location name" autofocus />
+                    <span asp-validation-for="Name" class="invalid-feedback d-block"></span>
+                </div>
+
+                <div class="d-flex gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa fa-save me-1"></i> Save
+                    </button>
+                    <a class="btn btn-outline-secondary" asp-action="Index">
+                        <i class="fa fa-arrow-left me-1"></i> Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <div class="card-footer text-muted small">
+            Keep names short and clear so they’re easy to pick in the Event form.
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        (function () {
+            // Close button: if not inside a modal, go back to Index (or returnUrl)
+            var closeBtn = document.getElementById('pageCloseBtn');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', function (e) {
+                    var modalOpen = document.querySelector('.modal.show');
+                    if (!modalOpen) {
+                        e.preventDefault();
+                        var back = new URLSearchParams(window.location.search).get('returnUrl');
+                        window.location.href = back || '@Url.Action("Index","Location")';
+                    }
+                });
+            }
+
+            // Bootstrap validation (works with jQuery unobtrusive)
+            var form = document.getElementById('edit-location');
+            if (form) {
+                form.addEventListener('submit', function (evt) {
+                    if (!form.checkValidity()) { evt.preventDefault(); evt.stopPropagation(); }
+                    form.classList.add('was-validated');
+                });
+            }
+        })();
+    </script>
+}
+
+

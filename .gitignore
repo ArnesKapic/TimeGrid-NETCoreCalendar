@@ -1,0 +1,41 @@
+# --- Visual Studio ---
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# --- Build output ---
+bin/
+obj/
+[Bb]uild/
+[Ll]ogs/
+TestResults/
+artifacts/
+
+# --- Publish artifacts ---
+**/app.publish/
+**/publish/
+*.pubxml
+*.pubxml.user
+
+# --- NuGet packages (optional; keep if you pack) ---
+*.nupkg
+*.snupkg
+
+# --- Rider/ReSharper ---
+_ReSharper*/
+*.DotSettings.user
+
+# --- Coverage ---
+coverage*/
+*.coverage
+*.coveragexml
+
+# --- OS cruft ---
+.DS_Store
+Thumbs.db
+
+# --- Secrets / local config (optional) ---
+appsettings.Development.json
+**/secrets.json

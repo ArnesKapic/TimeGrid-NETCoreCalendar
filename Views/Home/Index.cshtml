@@ -1,0 +1,252 @@
+﻿@{
+    ViewBag.Title = "My Calendar";
+    var eventsJson = (ViewData["Events"] ?? "[]").ToString();
+    var resourcesJson = (ViewData["Resources"] ?? "[]").ToString();
+}
+
+<style>
+    .calendar-shell {
+        max-width: 1200px;
+        margin: 1.5rem auto
+    }
+
+    .calendar-card {
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0,0,0,.08);
+        padding: 1rem
+    }
+
+    .page-title {
+        font-weight: 800;
+        font-size: clamp(1.6rem,2.5vw,3rem)
+    }
+</style>
+
+<div class="calendar-shell">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <h1 class="page-title m-0">Welcome To The Calender App!</h1>
+        <div class="d-flex gap-2">
+            <a class="btn btn-outline-primary" href="/MyCalendar">My Calendar</a>
+            <a class="btn btn-outline-secondary" href="/Event">Events</a>
+            <a class="btn btn-outline-secondary" href="/Location">Locations</a>
+        </div>
+    </div>
+
+    <div class="calendar-card mb-3">
+        <div class="row g-2 align-items-center">
+            <div class="col-12 col-md-5">
+                <input id="searchBox" class="form-control" type="search"
+                       placeholder="Search events by title or description…">
+            </div>
+            <div class="col-8 col-md-4">
+                <select id="filterResource" class="form-select">
+                    <option value="">All locations/resources</option>
+                </select>
+            </div>
+            <div class="col-4 col-md-3 d-flex align-items-center gap-2">
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="showWeekends" checked>
+                    <label class="form-check-label" for="showWeekends">Show weekends</label>
+                </div>
+                <button id="openCreateModal" class="btn btn-primary" type="button">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="calendar-card">
+        <div id="calendar"></div>
+    </div>
+</div>
+
+<!-- View Event Modal -->
+<div class="modal fade" id="eventModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="eventTitle" class="modal-title">Event</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-2"><strong>When:</strong> <span id="eventTime"></span></div>
+                <div class="mb-2"><strong>Location:</strong> <span id="eventLocation"></span></div>
+                <div><strong>Details:</strong> <span id="eventDescription"></span></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create Event Modal -->
+<div class="modal fade" id="createModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Create Event</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-2">
+                    <label class="form-label">Title</label>
+                    <input id="createTitle" type="text" class="form-control" placeholder="Event title">
+                </div>
+                <div class="row g-2">
+                    <div class="col-6">
+                        <label class="form-label">Start</label>
+                        <input id="createStart" type="datetime-local" class="form-control">
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label">End</label>
+                        <input id="createEnd" type="datetime-local" class="form-control">
+                    </div>
+                </div>
+                <div class="mt-2">
+                    <label class="form-label">Location/Resource ID (optional)</label>
+                    <input id="createResourceId" type="text" class="form-control">
+                </div>
+                <div class="mt-2">
+                    <label class="form-label">Description</label>
+                    <textarea id="createDescription" class="form-control" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="createSave" class="btn btn-primary" type="button">Add to calendar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* NOTE: MVC 5 default layout uses @RenderSection("scripts", required: false) (lowercase).
+   If your layout uses "Scripts" (capital S), change the section name below to match. *@
+@section scripts {
+    <script>
+        (function () {
+            // JSON from server
+            var events = @Html.Raw(eventsJson);
+            var resources = @Html.Raw(resourcesJson);
+
+            // Build resource filter options on the client (avoids Razor parsing issues)
+            try {
+                var sel = document.getElementById('filterResource');
+                if (Array.isArray(resources)) {
+                    resources.forEach(function (r) {
+                        var opt = document.createElement('option');
+                        var id = (r.id || r.resourceId || r.title || '').toString();
+                        opt.value = id;
+                        opt.textContent = (r.title || r.name || r.id || '').toString();
+                        sel.appendChild(opt);
+                    });
+                }
+            } catch (e) { /* ignore */ }
+
+            var calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
+                initialView: 'dayGridMonth',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,listMonth'
+                },
+                events: events,
+                selectable: true,
+                nowIndicator: true,
+                dayMaxEvents: true,
+                eventTimeFormat: { hour: 'numeric', minute: '2-digit', meridiem: 'short' },
+                select: function (info) {
+                    document.getElementById('createStart').value = toLocalInput(info.start);
+                    document.getElementById('createEnd').value = toLocalInput(info.end);
+                    openCreateModal();
+                    calendar.unselect();
+                },
+                eventClick: function (info) {
+                    document.getElementById('eventTitle').textContent = info.event.title || '(no title)';
+                    document.getElementById('eventTime').textContent = formatRange(info.event.start, info.event.end);
+                    document.getElementById('eventLocation').textContent = info.event.extendedProps.location || '—';
+                    document.getElementById('eventDescription').textContent = info.event.extendedProps.description || '—';
+                    openModal('eventModal');
+                },
+                eventDidMount: function (info) {
+                    var desc = info.event.extendedProps.description || '';
+                    var loc = info.event.extendedProps.location || '';
+                    var tip = [desc, loc].filter(Boolean).join(' • ');
+                    if (tip) info.el.setAttribute('title', tip);
+                }
+            });
+            calendar.render();
+
+            // Controls
+            document.getElementById('showWeekends').addEventListener('change', function () {
+                calendar.setOption('weekends', this.checked);
+            });
+
+            document.getElementById('openCreateModal').addEventListener('click', openCreateModal);
+
+            document.getElementById('createSave').addEventListener('click', function () {
+                var title = (document.getElementById('createTitle').value || 'New Event').trim();
+                var start = document.getElementById('createStart').value;
+                var end = document.getElementById('createEnd').value || null;
+                var resourceId = document.getElementById('createResourceId').value.trim();
+                var description = document.getElementById('createDescription').value.trim();
+
+                calendar.addEvent({
+                    title: title,
+                    start: start,
+                    end: end,
+                    extendedProps: { description: description, location: resourceId }
+                });
+
+                closeModal('createModal');
+                // TODO: POST to your controller to persist to DB.
+            });
+
+            document.getElementById('searchBox').addEventListener('input', function () {
+                var q = this.value.toLowerCase();
+                calendar.getEvents().forEach(function (ev) {
+                    var hay = ((ev.title || '') + ' ' + (ev.extendedProps.description || '')).toLowerCase();
+                    ev.setProp('display', !q || hay.indexOf(q) !== -1 ? 'auto' : 'none');
+                });
+            });
+
+            document.getElementById('filterResource').addEventListener('change', function () {
+                var target = this.value;
+                calendar.getEvents().forEach(function (ev) {
+                    var rid = ev.extendedProps.resourceId || ev.extendedProps.location || '';
+                    ev.setProp('display', !target || String(rid) === String(target) ? 'auto' : 'none');
+                });
+            });
+
+            function toLocalInput(date) {
+                if (!date) return '';
+                var d = new Date(date);
+                function pad(n) { return String(n).padStart(2, '0'); }
+                return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) +
+                    'T' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+            }
+            function formatRange(start, end) {
+                var s = FullCalendar.formatDate(start, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', meridiem: 'short' });
+                if (!end) return s;
+                var same = start.toDateString() === end.toDateString();
+                var e = FullCalendar.formatDate(end, same ? { hour: 'numeric', minute: '2-digit', meridiem: 'short' }
+                    : { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', meridiem: 'short' });
+                return s + ' – ' + e;
+            }
+            function openCreateModal() { openModal('createModal'); }
+            function openModal(id) {
+                if (window.bootstrap && bootstrap.Modal) {
+                    new bootstrap.Modal(document.getElementById(id)).show();
+                } else {
+                    document.getElementById(id).style.display = 'block';
+                }
+            }
+            function closeModal(id) {
+                if (window.bootstrap && bootstrap.Modal) {
+                    bootstrap.Modal.getInstance(document.getElementById(id)).hide();
+                } else {
+                    document.getElementById(id).style.display = 'none';
+                }
+            }
+        })();
+    </script>
+}
+

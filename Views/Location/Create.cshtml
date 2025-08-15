@@ -1,0 +1,101 @@
+﻿@model DotNetCoreCalendar.Models.Location
+@{
+    ViewData["Title"] = "Create Location";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    // Optional return URL support (if you open this in a modal or from another page)
+    var returnUrl = Context.Request.Query["returnUrl"].ToString();
+}
+
+<div class="container my-4">
+    <div class="card shadow-sm">
+        <div class="card-header d-flex align-items-center justify-content-between">
+            <div>
+                <h1 class="h4 mb-0">Create Location</h1>
+                <small class="text-muted">Add a new location/resource for events</small>
+            </div>
+            <!-- Close X: closes modal if present, else go back to Index -->
+            <button type="button" class="btn-close" aria-label="Close"
+                    data-bs-dismiss="modal" id="pageCloseBtn"></button>
+        </div>
+
+        <div class="card-body">
+            @* Dismissible alert for ViewData["Alert"] *@
+            @if (ViewData["Alert"] != null)
+            {
+                <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    @ViewData["Alert"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            <form asp-action="Create" method="post" class="needs-validation" novalidate
+                  asp-route-returnUrl="@returnUrl">
+                @Html.AntiForgeryToken()
+
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
+
+                <div class="mb-3">
+                    <label asp-for="Name" class="form-label"></label>
+                    <input asp-for="Name" class="form-control" autofocus />
+                    <span asp-validation-for="Name" class="invalid-feedback d-block"></span>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa fa-save me-1"></i> Create
+                    </button>
+
+                    <a class="btn btn-outline-secondary" asp-action="Index">
+                        <i class="fa fa-arrow-left me-1"></i> Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <div class="card-footer text-muted small">
+            Tip: Locations can be used as “resources” for filtering and tooltips in your calendar.
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        (function () {
+            // Make the page "X" safe: if not inside an open modal, go back to Index (or returnUrl)
+            var closeBtn = document.getElementById('pageCloseBtn');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', function (e) {
+                    // If there's an open Bootstrap modal, the data-bs-dismiss will handle it
+                    var modalOpen = document.querySelector('.modal.show');
+                    if (!modalOpen) {
+                        e.preventDefault();
+                        // Prefer returnUrl if provided, else go to Location/Index
+                        var params = new URLSearchParams(window.location.search);
+                        var back = params.get('returnUrl');
+                        if (back) {
+                            window.location.href = back;
+                        } else {
+                            window.location.href = '@Url.Action("Index", "Location")';
+                        }
+                    }
+                });
+            }
+
+            // Optional HTML5 validation UX (keeps unobtrusive validation intact)
+            var form = document.querySelector('form.needs-validation');
+            if (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            }
+        })();
+    </script>
+}

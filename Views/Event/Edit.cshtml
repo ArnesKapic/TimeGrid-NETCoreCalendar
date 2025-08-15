@@ -1,0 +1,157 @@
+﻿@model DotNetCoreCalendar.Models.ViewModels.EventViewModel
+
+@{
+    ViewData["Title"] = "Edit Event";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var returnUrl = Context.Request.Query["returnUrl"].ToString();
+}
+
+<div class="container my-4">
+    <div class="card shadow-sm">
+        <div class="card-header d-flex align-items-center justify-content-between">
+            <div>
+                <h1 class="h4 mb-0">Edit Event</h1>
+                <small class="text-muted">Update details and times</small>
+            </div>
+            <!-- Close: closes modal if present; else navigate back -->
+            <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal" id="pageCloseBtn"></button>
+        </div>
+
+        <div class="card-body">
+            <form asp-action="Edit" method="post" id="edit-event" class="needs-validation" novalidate asp-route-returnUrl="@returnUrl">
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(m => m.UserId)
+                <input type="hidden" asp-for="Event.Id" />
+
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
+
+                <div class="mb-3">
+                    <label asp-for="Event.Name" class="form-label">Title</label>
+                    <input asp-for="Event.Name" class="form-control" placeholder="Event title" autofocus />
+                    <span asp-validation-for="Event.Name" class="invalid-feedback d-block"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Event.Description" class="form-label"></label>
+                    <textarea asp-for="Event.Description" class="form-control" rows="3" placeholder="Optional"></textarea>
+                    <span asp-validation-for="Event.Description" class="invalid-feedback d-block"></span>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="Event.StartTime" class="form-label">Start</label>
+                        <input asp-for="Event.StartTime" type="datetime-local" class="form-control" id="start" />
+                        <span asp-validation-for="Event.StartTime" class="invalid-feedback d-block"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Event.EndTime" class="form-label">End</label>
+                        <input asp-for="Event.EndTime" type="datetime-local" class="form-control" id="end" />
+                        <span asp-validation-for="Event.EndTime" class="invalid-feedback d-block"></span>
+                    </div>
+                </div>
+
+                <div class="form-check form-switch mt-2">
+                    <input class="form-check-input" type="checkbox" id="allDay">
+                    <label class="form-check-label" for="allDay">All-day event</label>
+                </div>
+
+                <div class="mt-3">
+                    <label class="form-label">Location</label>
+                    @* Bind using your existing SelectList (no LocationId property required) *@
+                    @Html.DropDownList("Location", Model.Location, "Select a Location",
+                    new { @class = "form-select", id = "Location" })
+                </div>
+
+                <div class="d-flex gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa fa-save me-1"></i> Save
+                    </button>
+                    <a class="btn btn-outline-secondary" asp-action="Index">
+                        <i class="fa fa-arrow-left me-1"></i> Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <div class="card-footer text-muted small">
+            End time auto-adjusts to be after start. Use “All-day” to set to 00:00–23:59.
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        (function () {
+            // Close button: if not inside a modal, go back to Index (or returnUrl)
+            var closeBtn = document.getElementById('pageCloseBtn');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', function (e) {
+                    var modalOpen = document.querySelector('.modal.show');
+                    if (!modalOpen) {
+                        e.preventDefault();
+                        var back = new URLSearchParams(window.location.search).get('returnUrl');
+                        window.location.href = back || '@Url.Action("Index","Event")';
+                    }
+                });
+            }
+
+            // Preselect location by visible text (since model has no LocationId)
+            var currentLocationName = '@((Model.LocationName ?? "").Replace("'", "\\'"))';
+            (function setSelectedLocation(name) {
+                if (!name) return;
+                var sel = document.getElementById('Location');
+                if (!sel) return;
+                for (var i = 0; i < sel.options.length; i++) {
+                    if (sel.options[i].text.trim() === name.trim()) { sel.selectedIndex = i; break; }
+                }
+            })(currentLocationName);
+
+            // Helpers to keep End >= Start (local time formatting)
+            function fmtLocal(d) {
+                var pad = n => String(n).padStart(2, '0');
+                return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate())
+                    + 'T' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+            }
+            function addHoursLocal(val, h) {
+                var d = new Date(val);
+                d.setHours(d.getHours() + h);
+                return fmtLocal(d);
+            }
+
+            var start = document.getElementById('start');
+            var end = document.getElementById('end');
+
+            function syncEnd() {
+                if (!start || !end || !start.value) return;
+                end.min = start.value;
+                if (!end.value || end.value < start.value) end.value = addHoursLocal(start.value, 1);
+            }
+            if (start) { start.addEventListener('change', syncEnd); syncEnd(); }
+
+            // All-day toggle
+            var allDay = document.getElementById('allDay');
+            function setAllDay(on) {
+                if (!start || !end || !start.value) return;
+                if (on) {
+                    var day = start.value.substring(0, 10);
+                    start.value = day + 'T00:00';
+                    end.value = day + 'T23:59';
+                }
+            }
+            if (allDay) allDay.addEventListener('change', function () { setAllDay(this.checked); });
+
+            // Bootstrap validation
+            var form = document.getElementById('edit-event');
+            if (form) {
+                form.addEventListener('submit', function (evt) {
+                    if (!form.checkValidity()) { evt.preventDefault(); evt.stopPropagation(); }
+                    form.classList.add('was-validated');
+                });
+            }
+        })();
+    </script>
+}
+
