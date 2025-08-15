@@ -1,22 +1,4 @@
-# Tell GitHub Linguist to ignore vendor and build files in language stats
-
-# Ignore vendor libraries
+# Ignore minified JS/CSS and vendor libraries for language stats
 wwwroot/lib/* linguist-vendored
-wwwroot/js/* linguist-vendored
-wwwroot/css/* linguist-vendored
-
-# Ignore minified JavaScript and CSS
 *.min.js linguist-vendored
 *.min.css linguist-vendored
-
-# Ignore build artifacts
-bin/* linguist-vendored
-obj/* linguist-vendored
-
-# Ignore package manager files
-node_modules/* linguist-vendored
-
-# Ignore configuration files for language stats
-*.map linguist-vendored
-*.json linguist-vendored
-
